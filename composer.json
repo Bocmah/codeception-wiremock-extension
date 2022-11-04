@@ -27,7 +27,7 @@
     "require": {
         "php": ">=8.0",
         "codeception/codeception": "^5.0.0",
-        "wiremock-php/wiremock-php": "^2.33"
+        "wiremock-php/wiremock-php": "^2.32.0"
     },
     "require-dev": {
         "codeception/codeception": "^5.0.0",
