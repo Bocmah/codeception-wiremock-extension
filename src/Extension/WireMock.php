@@ -17,45 +17,26 @@
  */
 namespace Codeception\Extension;
 
-use Codeception\Platform\Extension as CodeceptionExtension;
+use Codeception\Extension;
 use WireMock\Client\WireMock as WireMockClient;
 
 /**
  * Codeception Extension for WireMock
  */
-class WireMock extends CodeceptionExtension
+class WireMock extends Extension
 {
-    /**
-     *
-     * @var WireMockDownloader
-     */
-    private $downloader;
-    /**
-     *
-     * @var WireMockProcess
-     */
-    private $process;
-    /**
-     *
-     * @var WireMockArguments
-     */
-    private $argumentsManager;
+    private WireMockDownloader $downloader;
 
-    /**
-     * Class constructor.
-     *
-     * @param array              $config
-     * @param array              $options
-     * @param WireMockDownloader $downloader       optional WireMockDownloader object
-     * @param WireMockProcess    $process          optional WireMockProcess object
-     * @param WireMockArguments  $argumentsManager optional WireMockArguments object
-     */
+    private WireMockProcess $process;
+
+    private WireMockArguments $argumentsManager;
+
     public function __construct(
         array $config,
         array $options,
-        WireMockDownloader $downloader = null,
-        WireMockProcess $process = null,
-        WireMockArguments $argumentsManager = null
+        ?WireMockDownloader $downloader = null,
+        ?WireMockProcess $process = null,
+        ?WireMockArguments $argumentsManager = null
     ) {
         parent::__construct($config, $options);
 
@@ -66,15 +47,17 @@ class WireMock extends CodeceptionExtension
         $this->config = $this->argumentsManager->sanitize($this->config);
 
         echo "Starting local wiremock" . PHP_EOL;
+
         $this->process->start(
             $this->getJarPath(),
             $this->config['logs-path'],
             $this->mapConfigToWireMockArguments($this->config)
         );
+
         sleep($this->config['start-delay']);
     }
 
-    private function initWireMockProcess($process)
+    private function initWireMockProcess($process): void
     {
         if ($process === null) {
             $this->process = new WireMockProcess();
@@ -83,7 +66,7 @@ class WireMock extends CodeceptionExtension
         }
     }
 
-    private function initWireMockDownloader($downloader)
+    private function initWireMockDownloader($downloader): void
     {
         if ($downloader === null) {
             $this->downloader = new WireMockDownloader();
@@ -92,7 +75,7 @@ class WireMock extends CodeceptionExtension
         }
     }
 
-    private function initWireMockArgumentsManager($argumentsManager)
+    private function initWireMockArgumentsManager($argumentsManager): void
     {
         if ($argumentsManager === null) {
             $this->argumentsManager = new WireMockArguments();
@@ -101,9 +84,6 @@ class WireMock extends CodeceptionExtension
         }
     }
 
-    /**
-     * Class destructor.
-     */
     public function __destruct()
     {
         $connection = WireMockClient::create('localhost', $this->config['port']);
@@ -123,17 +103,18 @@ class WireMock extends CodeceptionExtension
         } else {
             throw new \Exception("Bad configuration");
         }
+
         return $jarPath;
     }
 
-    private function checkJarExists($jar)
+    private function checkJarExists($jar): void
     {
         if (!file_exists($jar)) {
-            throw \Exception("File $jar does not exist");
+            throw new \Exception("File $jar does not exist");
         }
     }
 
-    private function mapConfigToWireMockArguments($config)
+    private function mapConfigToWireMockArguments($config): string
     {
         return $this->argumentsManager->generateArgumentsString($config);
     }

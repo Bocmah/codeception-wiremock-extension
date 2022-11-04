@@ -18,6 +18,7 @@
 namespace Codeception\Extension;
 
 use Codeception\Configuration as Config;
+use Codeception\Exception\ConfigurationException;
 
 /**
  * Utility class to work with config parameters and wiremock command line arguments.
@@ -26,10 +27,8 @@ class WireMockArguments
 {
     /**
      * Allowed wiremock arguments.
-     *
-     * @var array
      */
-    private $allowedWiremockArguments = [
+    private array $allowedWiremockArguments = [
         'root-dir' => true,
         'port' => true,
         'https_port' => true,
@@ -54,31 +53,25 @@ class WireMockArguments
     ];
     /**
      * Default values for minimum needed parameters.
-     *
-     * @var array
      */
-    private $defaults = [
+    private array $defaults = [
         'download-version' => '1.57',
         'port' => '8080',
         'start-delay' => '1',
     ];
 
     /**
-     * Class constructor.
+     * @throws ConfigurationException
      */
     public function __construct()
     {
-        $this->defaults['logs-path'] = Config::logDir();
+        $this->defaults['logs-path'] = Config::outputDir();
     }
 
     /**
      * Converts the wiremock arguments array to a cli arguments string.
-     *
-     * @param array $config
-     *
-     * @return string
      */
-    public function generateArgumentsString(array $config)
+    public function generateArgumentsString(array $config): string
     {
         $result = "";
 
@@ -93,14 +86,8 @@ class WireMockArguments
 
     /**
      * Generates an argument string with or without parameters.
-     *
-     * @param string  $key
-     * @param boolean $withValue
-     * @param string  $value
-     *
-     * @return string
      */
-    private function evaluateValueConfig($key, $withValue, $value)
+    private function evaluateValueConfig(string $key, bool $withValue, string $value): string
     {
         if ($withValue) {
             return " --{$key} {$value}";
@@ -112,12 +99,9 @@ class WireMockArguments
     }
 
     /**
-     * @param array $config
-     * @return array
-     *
      * @throws \Exception
      */
-    public function sanitize(array $config)
+    public function sanitize(array $config): array
     {
         $return = array_merge($this->defaults, $config);
         $this->checkLogsPath($return);
@@ -136,9 +120,9 @@ class WireMockArguments
     }
 
     /**
-     * @param array $config
+     * @throws \Exception
      */
-    private function checkLogsPath($config)
+    private function checkLogsPath(array $config): void
     {
         if (isset($config['logs-path'])) {
             $config['logs-path'] = rtrim($config['logs-path'], DIRECTORY_SEPARATOR);
@@ -146,7 +130,7 @@ class WireMockArguments
                 mkdir($config['logs-path'], 0777, true);
             }
             if (!is_writable($config['logs-path'])) {
-                throw \Exception("Logs directory ({$config['logs-path']}) is not writable");
+                throw new \Exception("Logs directory ({$config['logs-path']}) is not writable");
             }
         }
     }

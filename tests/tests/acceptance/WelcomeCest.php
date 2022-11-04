@@ -1,29 +1,15 @@
 <?php
 
-use Codeception\Extension\WiremockConnection;
-use Codeception\Util\Debug;
 use WireMock\Client\WireMock;
 
 class WelcomeCest
 {
-    /**
-     * @var \WireMock\Client\WireMock
-     */
-    //private $wiremock;
-
-    public function _before(\AcceptanceTester $I)
-    {
-        // $this->wiremock = WiremockConnection::get();
-
-    }
-
-    public function _after(\AcceptanceTester $I)
+    public function _after(\AcceptanceTester $I): void
     {
         $I->cleanAllPreviousRequestsToWireMock();
     }
 
-    // tests
-    public function tryToTest(\AcceptanceTester $I)
+    public function tryToTest(\AcceptanceTester $I): void
     {
         $I->expectRequestToWireMock(
             WireMock::get(WireMock::urlEqualTo('/some/url'))
@@ -32,7 +18,7 @@ class WelcomeCest
             ->withBody('Hello world!'))
         );
 
-        $response = file_get_contents('http://localhost:18080/some/url');
+        file_get_contents('http://localhost:18080/some/url');
 
         $I->receivedRequestToWireMock(
             WireMock::getRequestedFor(WireMock::urlEqualTo('/some/url'))

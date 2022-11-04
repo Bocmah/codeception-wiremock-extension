@@ -24,30 +24,25 @@ class WireMockProcess
 {
     /**
      * WireMock server log.
-     *
-     * @var string
      */
-    const LOG_FILE_NAME = 'wiremock.out';
+    public const LOG_FILE_NAME = 'wiremock.out';
 
     /**
      * @var resource
      */
     private $process;
+
     /**
      * @var resource[]
      */
-    private $pipes;
+    private array $pipes;
 
     /**
      * Starts a wiremock process.
      *
-     * @param string $jarPath
-     * @param string $logsPath
-     * @param string $arguments
-     *
      * @throws \Exception
      */
-    public function start($jarPath, $logsPath, $arguments)
+    public function start(string $jarPath, string $logsPath, string $arguments): void
     {
         $this->checkIfProcessIsRunning();
 
@@ -61,39 +56,32 @@ class WireMockProcess
             null,
             ['bypass_shell' => true]
         );
+
         $this->checkProcessIsRunning();
     }
 
-    /**
-     * @param string $logsPath
-     *
-     * @return array[]
-     */
-    private function createProcessDescriptors($logsPath)
+    private function createProcessDescriptors(string $logsPath): array
     {
         $logFile = $logsPath . DIRECTORY_SEPARATOR . self::LOG_FILE_NAME;
-        $descriptors = [
+
+        return [
             ['pipe', 'r'],
             ['file', $logFile, 'w'],
             ['file', $logFile, 'a'],
         ];
-        return $descriptors;
     }
 
     /**
      * @throws \Exception
      */
-    private function checkIfProcessIsRunning()
+    private function checkIfProcessIsRunning(): void
     {
         if ($this->process !== null) {
             throw new \Exception('The server is already running');
         }
     }
 
-    /**
-     * @return boolean
-     */
-    public function isRunning()
+    public function isRunning(): bool
     {
         return isset($this->process) && is_resource($this->process);
     }
@@ -101,7 +89,7 @@ class WireMockProcess
     /**
      * @throws \Exception
      */
-    private function checkProcessIsRunning()
+    private function checkProcessIsRunning(): void
     {
         if (!$this->isRunning()) {
             throw new \Exception('Could not start local wiremock server');
@@ -111,7 +99,7 @@ class WireMockProcess
     /**
      * Stops the process.
      */
-    public function stop()
+    public function stop(): void
     {
         if (is_resource($this->process)) {
             foreach ($this->pipes as $pipe) {
@@ -125,14 +113,12 @@ class WireMockProcess
         }
     }
 
-    /**
-     * @return string
-     */
-    private function getCommandPrefix()
+    private function getCommandPrefix(): string
     {
-        if (PHP_OS == 'WIN32' || PHP_OS == 'WINNT' || PHP_OS == 'Windows') {
+        if (PHP_OS === 'WIN32' || PHP_OS === 'WINNT' || PHP_OS === 'Windows') {
             return '';
         }
+
         return 'exec ';
     }
 }
